@@ -1,0 +1,61 @@
+/* ============================================================
+   board.css — tata letak halaman pemain
+   ============================================================ */
+
+body{padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:560px;margin:0 auto;padding:16px 14px 128px}
+
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+.topbtns{display:flex;gap:8px}
+.subtitle{margin:6px 0 0;color:var(--muted);font-size:.875rem}
+
+.board{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:10px;
+  box-shadow:0 10px 30px -22px rgba(0,0,0,.6);
+}
+
+.status{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:12px;font-size:.8125rem;color:var(--muted);
+}
+.pill{
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:4px 11px;font-weight:700;font-size:.75rem;color:var(--text);
+}
+.pill.win{background:var(--win-soft);border-color:var(--win);color:var(--win)}
+
+.banner{
+  margin-top:12px;padding:12px 14px;border-radius:12px;
+  background:var(--win-soft);border:1px solid var(--win);
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+}
+.banner.show{display:flex}
+.banner strong{
+  font-family:"Fraunces",Georgia,serif;font-weight:900;
+  font-size:1.25rem;color:var(--win);display:block;line-height:1.1;
+}
+.banner small{font-size:.75rem;color:var(--text);opacity:.75}
+.banner .btn{background:var(--surface)}
+
+.callbox{
+  margin-top:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:12px 14px;
+}
+.callbox h2{margin:0;font-size:.8125rem;font-weight:700;color:var(--muted)}
+
+.modebadge{font-size:.7rem;color:var(--muted);margin-top:16px;text-align:center}
+
+.bar{
+  position:fixed;left:0;right:0;bottom:0;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  z-index:30;
+}
+.bar-inner{max-width:560px;margin:0 auto;display:flex;gap:8px}
+.bar-inner .btn{flex:1;min-height:46px}
+.bar-inner .btn.ghost{flex:0 0 auto;width:52px}
