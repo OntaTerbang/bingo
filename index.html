@@ -15,14 +15,14 @@
 
 <div class="wrap">
   <header class="top">
-    <div>
-      <h1 class="title" id="t-title">Memuat papan…</h1>
-      <p class="subtitle" id="t-sub"></p>
-    </div>
-    <div class="topbtns">
-      <button class="iconbtn" id="btn-theme" aria-label="Ganti tema terang atau gelap">◐</button>
-      <a class="iconbtn" id="btn-admin-link" href="admin.html" aria-label="Buka halaman admin">⚙</a>
-    </div>
+ <div>
+  <h1 class="title" id="t-title">Memuat papan…</h1>
+  <p class="subtitle" id="t-sub"></p>
+  <p class="player" id="player" hidden>
+    Main sebagai <b id="p-name"></b> ·
+    <button class="linkbtn" id="btn-rename" type="button">ganti</button>
+  </p>
+</div>
   </header>
 
   <div class="board">
@@ -60,6 +60,19 @@
   </div>
 </nav>
 
+<div class="gate" id="namegate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
+  <div class="gate-card">
+    <h2 class="title" id="g-title">Siapa namamu?</h2>
+    <p class="hint">Nama ini dikirim ke admin kalau kamu lapor menang.</p>
+    <div class="field">
+      <label for="g-name">Nama</label>
+      <input type="text" id="g-name" maxlength="40" autocomplete="nickname" placeholder="Nama panggilan">
+    </div>
+    <button class="btn primary block" id="g-go" type="button">Mulai main</button>
+    <p class="error" id="g-error" hidden></p>
+    <p class="hint center"><button class="linkbtn" id="g-cancel" type="button" hidden>Batal</button></p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module" src="assets/js/player.js"></script>

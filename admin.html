@@ -120,10 +120,13 @@
           <p class="note" id="items-note"></p>
         </div>
         <div class="btnrow">
-          <button class="btn small" id="f-sort">Urutkan A–Z</button>
-          <button class="btn small" id="f-dedupe">Hapus duplikat</button>
-          <button class="btn small" id="f-sample">Isi contoh</button>
-        </div>
+  <button class="btn small" id="f-sort">Urutkan A–Z</button>
+  <button class="btn small" id="f-dedupe">Hapus duplikat</button>
+  <button class="btn small" id="f-sample">Isi contoh</button>
+  <button class="btn small" id="f-csv" type="button">Unggah CSV</button>
+  <input type="file" id="f-csvfile" accept=".csv,.txt,text/csv" hidden>
+</div>
+<p class="note">CSV: satu item per baris. Kalau ada baris judul bernama <i>item</i>, <i>isi</i>, <i>kotak</i>, atau <i>teks</i>, hanya kolom itu yang dipakai.</p>
       </section>
 
       <section class="card">

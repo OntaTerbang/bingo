@@ -19,8 +19,57 @@ let history = [];
 let called = [];
 let lastLineCount = 0;
 let claimed = false;
+let playerName = "";
 
 const slug = new URLSearchParams(location.search).get("board") || DEFAULT_SLUG;
+
+/* ---------- nama pemain (disimpan di perangkat) ---------- */
+const NAME_KEY = "bingo:player";
+
+function loadName(){
+  try { return (localStorage.getItem(NAME_KEY) || "").trim().slice(0, 40); }
+  catch(e){ return ""; }
+}
+function saveName(n){
+  try { localStorage.setItem(NAME_KEY, n); } catch(e){}
+}
+
+function openGate(){
+  const gate = $("#namegate");
+  const input = $("#g-name");
+  input.value = playerName;
+  $("#g-error").hidden = true;
+  $("#g-cancel").hidden = !playerName;      // batal hanya bisa kalau sudah punya nama
+  gate.hidden = false;
+  setTimeout(() => { input.focus(); input.select(); }, 30);
+}
+function closeGate(){
+  $("#namegate").hidden = true;
+}
+function submitName(){
+  const n = $("#g-name").value.replace(/\s+/g, " ").trim().slice(0, 40);
+  if (!n){
+    const err = $("#g-error");
+    err.textContent = "Isi namamu dulu ya.";
+    err.hidden = false;
+    $("#g-name").focus();
+    return;
+  }
+  const changed = n !== playerName;
+  playerName = n;
+  saveName(n);
+  closeGate();
+  if (changed) claimed = false;             // nama baru boleh melapor lagi
+  render();
+}
+
+$("#g-go").addEventListener("click", submitName);
+$("#g-name").addEventListener("keydown", e => {
+  if (e.key === "Enter"){ e.preventDefault(); submitName(); }
+  if (e.key === "Escape" && playerName) closeGate();
+});
+$("#g-cancel").addEventListener("click", closeGate);
+$("#btn-rename").addEventListener("click", openGate);
 
 /* ---------- penyimpanan kartu di perangkat pemain ---------- */
 const keyFor = suffix => "bingo:card:" + layoutKey(board) + ":" + suffix;
@@ -60,6 +109,10 @@ function render(){
   $("#t-sub").textContent = board.subtitle;
   document.title = board.title;
 
+  const who = $("#player");
+  who.hidden = !playerName;
+  $("#p-name").textContent = playerName;
+
   renderGrid($("#grid"), $("#letters"), board, { card, marks, called, interactive: true });
 
   const done = completedLines(board.size, marks);
@@ -73,12 +126,11 @@ function render(){
   const banner = $("#banner");
   banner.classList.toggle("show", done.length > 0);
   if (done.length){
+    const prefix = playerName ? playerName + ", " : "";
     $("#banner-sub").textContent = count === card.length
-      ? "Papan penuh. Luar biasa."
-      : done.length + " garis selesai.";
+      ? prefix + "papan penuh. Luar biasa."
+      : prefix + done.length + " garis selesai.";
   }
-  $("#btn-claim").hidden = claimed;
-  $("#btn-claim").textContent = claimed ? "Sudah dilaporkan" : "Lapor menang";
 
   if (done.length > lastLineCount) confetti();
   lastLineCount = done.length;
@@ -142,15 +194,19 @@ $("#btn-new").addEventListener("click", () => {
 });
 
 $("#btn-claim").addEventListener("click", async () => {
-  const name = prompt("Nama kamu, supaya admin tahu siapa yang menang:");
-  if (name === null) return;
+  if (!playerName){ openGate(); return; }
+  if (!board.id || board.id === "fallback"){
+    toast("Papan ini belum dibuat di admin, laporan tidak bisa dikirim");
+    return;
+  }
   try {
-    await addWin(board.id, name.trim() || "Tanpa nama", completedLines(board.size, marks).length);
+    await addWin(board.id, playerName, completedLines(board.size, marks).length);
     claimed = true;
     render();
     toast("Laporan terkirim ke admin");
   } catch(err){
-    toast("Gagal mengirim laporan");
+    console.error("addWin gagal:", err);
+    toast("Gagal mengirim: " + ((err && err.message) || "coba lagi"));
   }
 });
 
@@ -164,8 +220,12 @@ addEventListener("resize", () => {
 
 /* ---------- mulai ---------- */
 async function start(){
+  playerName = loadName();
+  if (!playerName) openGate();              // tanya nama di awal
+
   let data = null;
-  try { data = await getBoard(slug); } catch(e){ /* biarkan */ }
+  try { data = await getBoard(slug); }
+  catch(e){ console.error("getBoard gagal:", e); }
 
   if (!data){
     board = normalizeBoard(Object.assign({}, DEFAULT_BOARD, { slug }));
@@ -179,7 +239,9 @@ async function start(){
   applyFree();
   render();
 
-  if (board.hostMode && board.id){
+  const realBoard = board.id && board.id !== "fallback";
+
+  if (board.hostMode && realBoard){
     try { called = await getCalls(board.id); render(); } catch(e){}
   }
 
@@ -192,7 +254,7 @@ async function start(){
     render();
   });
 
-  if (board.id){
+  if (realBoard){
     subscribeCalls(board.id, list => {
       called = Array.isArray(list) ? list : [];
       render();

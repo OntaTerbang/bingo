@@ -32,7 +32,12 @@ async function boot(){
   if (user) showShell(user);
   else showAuth();
 
-  onAuthChange(u => u ? showShell(u) : showAuth());
+  // Supabase juga memicu event ini saat token diperbarui.
+  // Jangan muat ulang formulir kalau ruang kerja sudah terbuka.
+  onAuthChange(u => {
+    if (u){ if ($("#shell").hidden) showShell(u); }
+    else showAuth();
+  });
 }
 
 function showAuth(){
@@ -221,6 +226,72 @@ $("#f-sample").addEventListener("click", () => {
   $("#f-items").value = SAMPLE_ITEMS.join("\n");
   updateNote(); refreshPreview(true);
 });
+
+/* ---------- unggah CSV ---------- */
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/, "");
+  // Excel versi Indonesia sering memakai titik koma sebagai pemisah
+  const first = (text.split(/\r?\n/, 1)[0] || "").replace(/"[^"]*"/g, "");
+  const delim = (first.match(/;/g) || []).length > (first.match(/,/g) || []).length ? ";" : ",";
+
+  const rows = [];
+  let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if (q){
+      if (ch === '"'){
+        if (text[i + 1] === '"'){ cell += '"'; i++; }
+        else q = false;
+      } else cell += ch;
+    } else if (ch === '"' && cell === ""){
+      q = true;
+    } else if (ch === delim){
+      row.push(cell); cell = "";
+    } else if (ch === "\n"){
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else if (ch !== "\r"){
+      cell += ch;
+    }
+  }
+  row.push(cell); rows.push(row);
+  return rows;
+}
+
+function itemsFromCSV(text){
+  const rows = parseCSV(text);
+  const clean = c => String(c || "").replace(/\s+/g, " ").trim();
+  const names = ["item", "items", "isi", "kotak", "teks", "text", "nama"];
+  const col = (rows[0] || []).map(c => clean(c).toLowerCase()).findIndex(c => names.includes(c));
+  const cells = col >= 0
+    ? rows.slice(1).map(r => r[col])
+    : rows.reduce((all, r) => all.concat(r), []);
+  return cells.map(clean).filter(Boolean);
+}
+
+$("#f-csv").addEventListener("click", () => $("#f-csvfile").click());
+$("#f-csvfile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  e.target.value = "";                       // supaya file yang sama bisa dipilih lagi
+  if (!file) return;
+  if (file.size > 1024 * 1024){ toast("File terlalu besar (maks 1 MB)"); return; }
+
+  let items;
+  try { items = itemsFromCSV(await file.text()); }
+  catch(err){ toast("Gagal membaca file"); return; }
+  if (!items.length){ toast("Tidak ada item di file itu"); return; }
+
+  const existing = $("#f-items").value.split("\n").map(s => s.trim()).filter(Boolean);
+  let result = items;
+  if (existing.length && !confirm(
+    "Ganti isi kotak yang ada dengan " + items.length + " item dari CSV?\n\n" +
+    "OK = ganti semuanya\nBatal = tambahkan di bawah isi yang ada"
+  )) result = existing.concat(items);
+
+  $("#f-items").value = result.join("\n");
+  updateNote(); refreshPreview(true);
+  toast(items.length + " item dari CSV dimuat" + (result.length > 200 ? ", hanya 200 pertama yang dipakai" : ""));
+});
+
 $("#f-reshuffle").addEventListener("click", () => refreshPreview(true));
 
 $("#f-copy").addEventListener("click", async () => {
