@@ -6,7 +6,8 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .wrap{max-width:560px;margin:0 auto;padding:16px 14px 128px}
 
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
-.topbtns{display:flex;gap:8px}
+.top > div:first-child{min-width:0}
+.topbtns{display:flex;gap:8px;flex:0 0 auto}
 .subtitle{margin:6px 0 0;color:var(--muted);font-size:.875rem}
 
 .board{

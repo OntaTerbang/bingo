@@ -235,7 +235,7 @@ async function start(){
     board = data;
   }
 
-  if (!loadCard()) newCard();
+  newCard();                                // selalu mulai dari kartu baru
   applyFree();
   render();
 
@@ -263,3 +263,6 @@ async function start(){
 }
 
 start();
+
+/* Kalau halaman dipulihkan dari cache (tombol Back), muat ulang supaya tetap reset. */
+addEventListener("pageshow", e => { if (e.persisted) location.reload(); });

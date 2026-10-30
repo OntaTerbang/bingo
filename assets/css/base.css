@@ -108,6 +108,7 @@ a{color:var(--ink)}
   width:40px;height:40px;min-width:40px;display:grid;place-items:center;
   font-size:1.05rem;text-decoration:none;color:var(--text);flex:0 0 auto;
 }
+.iconbtn svg{display:block}
 .linkbtn{background:none;border:none;padding:0;color:var(--ink);font-size:.8125rem;font-weight:700;text-decoration:underline}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 
@@ -190,4 +191,4 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 
 @media (prefers-reduced-motion: reduce){
   .cell,.cell::after,.toast{transition:none}
-}
+} 
